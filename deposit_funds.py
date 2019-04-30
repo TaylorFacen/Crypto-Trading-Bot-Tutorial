@@ -1,4 +1,5 @@
 from cbpro_client import cbpro_client
+from logger import logger
 
 @cbpro_client
 def get_deposit_account(cbpro_client):
@@ -42,7 +43,8 @@ def get_deposit_account(cbpro_client):
 
 
 @cbpro_client
-def deposit_funds(cbpro_client, deposit_amount = 10): # Default deposit amount is $10
+@logger
+def deposit_funds(cbpro_client, logger, deposit_amount = 10): # Default deposit amount is $10
     """ Makes deposit into USD Wallet
     
     Params: 
@@ -56,9 +58,14 @@ def deposit_funds(cbpro_client, deposit_amount = 10): # Default deposit amount i
             'payout_at' : str (datetime)
         }
     """
-
+    logger.info("Getting account ID")
     deposit_account_id = get_deposit_account()['id']
+    logger.info("Account ID: {}".format(deposit_account_id))
 
     resp = cbpro_client.deposit(deposit_amount, 'USD', deposit_account_id)
+    if 'message' in resp.keys():
+        logger.warning("In sandbox mode, unable to make deposit")
+    else:
+        logger.info("Deposit Response: {}".format(resp))
 
     return resp
